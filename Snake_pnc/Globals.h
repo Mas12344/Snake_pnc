@@ -12,4 +12,10 @@ enum tile {
 	FRUIT
 };
 
+enum dir {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT
+};
 #endif // !GLOBALS_H

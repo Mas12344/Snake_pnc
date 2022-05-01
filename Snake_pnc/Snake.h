@@ -12,6 +12,29 @@ struct snakePart
 
 typedef struct snakePart SnakePart;
 
+bool isPart(int _x, int _y, SnakePart* head) {
+	SnakePart* tmp = head;
+	while (tmp->next != NULL) {
+		if (tmp->x == _x && tmp->y == _y) {
+			return true;
+		}
+		tmp = tmp->next;
+	}
+	return false;
+}
+
+void removeEnd(SnakePart* head) {
+	SnakePart* tmp = head;
+	SnakePart* p = NULL;
+	while (tmp->next != NULL) {
+		p = tmp;
+		tmp = tmp->next;
+	}
+
+	p->next = NULL;
+	free(tmp);
+}
+
 void newEndPart(SnakePart* head, int _x, int _y) {
 	SnakePart* newEnd = malloc(sizeof(SnakePart));
 	SnakePart* tmp = head;
