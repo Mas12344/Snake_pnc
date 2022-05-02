@@ -18,6 +18,11 @@ SnakePart* Head;
 Fruit Owocek = { 5, 10 };
 int lastDirection = DOWN;
 
+int UpKey    = 0;
+int DownKey  = 1;
+int LeftKey  = 0;
+int RightKey = 0;
+
 
 bool init() {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -48,8 +53,10 @@ bool init() {
 			fprintf(stderr, "Error no memmory\n");
 			return false;
 		}
-		memset(Board[i], 0, WIDTH * sizeof(*Board[i]));
+		memset(Board[i], EMPTY, WIDTH * sizeof(*Board[i]));
 	}
+
+
 
 	Head = initSnake(WIDTH / 2, HEIGHT / 2);
 	srand(time(NULL));
@@ -72,39 +79,72 @@ void quit() {
 }
 //input handling
 
-void keyDownEvent(SDL_Event e) {
-
+int keyDownEvent(SDL_Event e) {
+	
+	switch (e.key.keysym.scancode) {
+	case SDL_SCANCODE_DOWN:
+		DownKey = UpKey = LeftKey = RightKey = 0;
+		DownKey = 1;
+		//lastDirection = DOWN;
+		break;
+	case SDL_SCANCODE_LEFT:
+		DownKey = UpKey = LeftKey = RightKey = 0;
+		LeftKey = 1;
+		//lastDirection = LEFT;
+		break;
+	case SDL_SCANCODE_UP:
+		DownKey = UpKey = LeftKey = RightKey = 0;
+		UpKey = 1;
+		//lastDirection = UP;
+		break;
+	case SDL_SCANCODE_RIGHT:
+		DownKey = UpKey = LeftKey = RightKey = 0;
+		RightKey = 1;
+		//lastDirection = RIGHT;
+		break;
+	case SDL_SCANCODE_ESCAPE:
+		return 1;
+	}
+	return 0;
 }
 
-void keyUpEvent(SDL_Event e) {
-
-}
-
-void Update(int direction)
+bool Update(int direction)
 {
-	int dx, dy;
+	int dx=0, dy=0;
 	
 	switch (direction)
 	{
 	case UP:
-		if (lastDirection == DOWN) break;
 		dx = 0;
 		dy = -1;
+		if (lastDirection == DOWN) {
+			dy *= -1;
+		}
+		else lastDirection = UP;
 		break;
 	case DOWN:
-		if (lastDirection == UP) break;
 		dx = 0;
 		dy = 1;
+		if (lastDirection == UP) {
+			dy *= -1;
+		}
+		else lastDirection = DOWN;
 		break;
 	case LEFT:
-		if (lastDirection == RIGHT) break;
 		dx = -1;
 		dy = 0;
+		if (lastDirection == RIGHT) {
+			dx *= -1;
+		}
+		else lastDirection = LEFT;
 		break;
 	case RIGHT:
-		if (lastDirection == LEFT) break;
 		dx = 1;
 		dy = 0;
+		if (lastDirection == LEFT) {
+			dx *= -1;
+		}
+		else lastDirection = RIGHT;
 		break;
 	default:
 		fprintf(stderr, "nie powinno mnie tu byc\n");
@@ -114,7 +154,7 @@ void Update(int direction)
 	ny = Head->y + dy;
 	if (isPart(nx, ny, Head) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
 	{
-		return; // koniec gry wszedl w siebie debil
+		return false; // koniec gry wszedl w siebie debil
 	}
 	else
 	{
@@ -157,6 +197,7 @@ void Update(int direction)
 		tmp = tmp->next;
 	}
 
+	return true;
 }
 
 
@@ -166,6 +207,7 @@ int main() {
 	}
 	
 	bool running = true;
+	float elapsedTime = 0;
 	while (running) {
 		Uint64 start = SDL_GetPerformanceCounter();
 		SDL_Event e;
@@ -188,26 +230,41 @@ int main() {
 			case SDL_KEYDOWN:
 				keyDownEvent(e);
 				break;
-			case SDL_KEYUP:
-				keyUpEvent(e);
-				break;
 			}
 		}
 
-		Update(LEFT);
+		//physics loop
+		if (elapsedTime >= 50.0f) {
 
+			elapsedTime = 0;
+			if (DownKey) {
+				running = Update(DOWN);
+			}
+			else if (LeftKey) {
+				running = Update(LEFT);
+			}
+			else if (UpKey) {
+				running = Update(UP);
+			}
+			else if (RightKey) {
+				running = Update(RIGHT);
+			}
+		}
+		//rendering loop
 		DrawBoard(Board, renderer);
-		
 		SDL_RenderPresent(renderer);
 
 		Uint64 end = SDL_GetPerformanceCounter();
-
-		float elapsedTime = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-
-		SDL_Delay(1000);
+		
+		elapsedTime += (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.f;
+		printf("lasdir - %d\n", lastDirection);
+		//SDL_Delay(100);
 		
 	}
 	
 	quit();
 	return 0;
 }
+
+
+// Lambert Lambert, ty *****!

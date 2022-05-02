@@ -72,7 +72,7 @@ SnakePart* createHead(int _x, int _y) {
 SnakePart* initSnake(int _x, int _y) {
 	SnakePart* HEAD = createHead(_x, _y);
 	int i;
-	for (i = 1; i < 4; i++) {
+	for (i = 1; i < 5; i++) {
 		newEndPart(HEAD, _x, _y - i);
 	}
 	
