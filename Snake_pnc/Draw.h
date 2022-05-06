@@ -33,7 +33,9 @@ void DrawBoard(int** board, SDL_Renderer* renderer) {
 					SDL_SetRenderDrawColor(renderer, 220, 220, 220, 255);
 				}
 				break;
-
+			case WALL:
+				SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
+				break;
 			}
 			SDL_RenderFillRect(renderer, &r);
 			SDL_SetRenderDrawColor(renderer, 60, 140, 70, 255);

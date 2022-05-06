@@ -9,7 +9,8 @@
 enum tile {
 	EMPTY,
 	SNAKE,
-	FRUIT
+	FRUIT,
+	WALL
 };
 
 enum dir {

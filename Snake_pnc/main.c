@@ -8,14 +8,16 @@
 #include "Globals.h"
 #include "Draw.h"
 
-typedef struct fruit { int x; int y; } Fruit;
+typedef struct point { int x; int y; } Point;
 
 SDL_Window* window;
 SDL_Renderer* renderer;
 
 int** Board;
 SnakePart* Head;
-Fruit Owocek = { 5, 10 };
+Point Owocek = { 5, 10 };
+Point Sciany[] = { {5, 4}, {5, 5}, {5, 6}, {5, 7} };
+int ileScian = sizeof(Sciany) / sizeof(Sciany[0]);
 int lastDirection = DOWN;
 
 int UpKey    = 0;
@@ -23,6 +25,14 @@ int DownKey  = 1;
 int LeftKey  = 0;
 int RightKey = 0;
 
+bool isOnWall(int x, int y) {
+	for (int i = 0; i < ileScian; i++) {
+		if (x == Sciany[i].x && y == Sciany[i].y) {
+			return true;
+		}
+	}
+	return false;
+}
 
 bool init() {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -152,7 +162,7 @@ bool Update(int direction)
 	int nx, ny;
 	nx = Head->x + dx;
 	ny = Head->y + dy;
-	if (isPart(nx, ny, Head) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
+	if (isPart(nx, ny, Head) || isOnWall(nx, ny) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
 	{
 		return false; // koniec gry wszedl w siebie debil
 	}
@@ -188,9 +198,14 @@ bool Update(int direction)
 	for (int y = 0; y < HEIGHT; y++) {
 		memset(Board[y], EMPTY, WIDTH * sizeof(*Board[y]));
 	}
-	//2 rysuj owoca
+	//2 stawiaj sciany
+	for (int i = 0; i < ileScian; i++) {
+		Board[Sciany[i].y][Sciany[i].x] = WALL;
+	}
+
+	//3 rysuj owoca
 	Board[Owocek.y][Owocek.x] = FRUIT;
-	//3 rysuj weza
+	//4 rysuj weza
 	SnakePart* tmp = Head;
 	while (tmp->next != NULL) {
 		Board[tmp->y][tmp->x] = SNAKE;
@@ -234,7 +249,7 @@ int main() {
 		}
 
 		//physics loop
-		if (elapsedTime >= 50.0f) {
+		if (elapsedTime >= 70.0f) {
 
 			elapsedTime = 0;
 			if (DownKey) {
@@ -257,7 +272,7 @@ int main() {
 		Uint64 end = SDL_GetPerformanceCounter();
 		
 		elapsedTime += (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.f;
-		printf("lasdir - %d\n", lastDirection);
+		//printf("lasdir - %d\n", lastDirection);
 		//SDL_Delay(100);
 		
 	}
