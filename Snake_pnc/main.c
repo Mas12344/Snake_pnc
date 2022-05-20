@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdbool.h>
 #include <time.h>
 
@@ -15,7 +16,7 @@ SDL_Renderer* renderer;
 
 int** Board;
 SnakePart* Head;
-Point Owocek = { 5, 10 };
+Point Owocek = { 5, 12 };
 Point Sciany[] = { {5, 4}, {5, 5}, {5, 6}, {5, 7} };
 int ileScian = sizeof(Sciany) / sizeof(Sciany[0]);
 int lastDirection = DOWN;
@@ -24,6 +25,8 @@ int UpKey    = 0;
 int DownKey  = 1;
 int LeftKey  = 0;
 int RightKey = 0;
+
+int wynik = 0;
 
 bool isOnWall(int x, int y) {
 	for (int i = 0; i < ileScian; i++) {
@@ -40,7 +43,12 @@ bool init() {
 		return false;
 	}
 
-	window = SDL_CreateWindow("Snake pnc", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH*TILE_SIZE, HEIGHT*TILE_SIZE, SDL_WINDOW_SHOWN);
+	if (TTF_Init() < 0) {
+		fprintf(stderr, "Error init TTF: %s\n", TTF_GetError());
+		return false;
+	}
+
+	window = SDL_CreateWindow("Snake pnc", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH*TILE_SIZE + BLANK_SPACE_PX, HEIGHT*TILE_SIZE, SDL_WINDOW_SHOWN);
 	if (!window) {
 		fprintf(stderr, "Error window create: %s\n", SDL_GetError());
 		return false;
@@ -164,7 +172,7 @@ bool Update(int direction)
 	ny = Head->y + dy;
 	if (isPart(nx, ny, Head) || isOnWall(nx, ny) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
 	{
-		return false; // koniec gry wszedl w siebie debil
+		return false;
 	}
 	else
 	{
@@ -176,6 +184,7 @@ bool Update(int direction)
 		else {
 			Owocek.x = -1;
 			Owocek.y = -1;
+			wynik += 10;
 		}
 	}
 	//tutaj owoc musi byc dobry
@@ -198,6 +207,7 @@ bool Update(int direction)
 	for (int y = 0; y < HEIGHT; y++) {
 		memset(Board[y], EMPTY, WIDTH * sizeof(*Board[y]));
 	}
+
 	//2 stawiaj sciany
 	for (int i = 0; i < ileScian; i++) {
 		Board[Sciany[i].y][Sciany[i].x] = WALL;
@@ -205,6 +215,7 @@ bool Update(int direction)
 
 	//3 rysuj owoca
 	Board[Owocek.y][Owocek.x] = FRUIT;
+
 	//4 rysuj weza
 	SnakePart* tmp = Head;
 	while (tmp->next != NULL) {
@@ -266,7 +277,7 @@ int main() {
 			}
 		}
 		//rendering loop
-		DrawBoard(Board, renderer);
+		DrawBoard(Board, wynik, renderer);
 		SDL_RenderPresent(renderer);
 
 		Uint64 end = SDL_GetPerformanceCounter();

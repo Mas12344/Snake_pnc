@@ -4,6 +4,8 @@
 #define HEIGHT 20
 #define WIDTH 20
 
+#define BLANK_SPACE_PX 300
+
 #define TILE_SIZE 30
 
 enum tile {
