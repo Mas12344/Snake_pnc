@@ -17,11 +17,25 @@ SDL_Renderer* renderer;
 int** Board;
 SnakePart* Head;
 Point Owocek = { 11, 11 };
-Point Sciany[] = { {5, 4}, {5, 5}, {5, 6}, {5, 7} };
+
 Point Sciany1[] = { {0, 10} ,{1, 10}, {2, 10}, {3, 10}, {4, 10}, {5,10} ,{6, 10}, {7, 10}, {8, 10}, {9, 10}, {11,10} ,{12, 10}, {13, 10}, {14, 10}, {15, 10}, {16,10} ,{17, 10}, {18, 10}, {19, 10} };
 Point Sciany2[] = { {9, 9}, {9, 10}, {10, 9}, {10, 10} , {3, 6}, {4, 6}, {5, 6}, {6, 6}, {6, 3}, {6, 4}, {6, 5} , {16, 6}, {15, 6}, {14, 6}, {13, 6}, {13, 5}, {13, 4}, {13, 3} , {6, 16}, {6, 15}, {6, 14}, {6, 13}, {5, 13}, {4, 13}, {3, 13} , {16, 13}, {15, 13}, {14, 13}, {13, 13}, {13, 14}, {13, 15}, {13, 16} };
 Point Sciany3[] = { {5, 7}, {4, 8}, {5, 8}, {6, 8}, {3, 9}, {4, 9}, {5, 9}, {6, 9}, {7, 9} , {3, 10}, {4, 10}, {5, 10}, {6, 10}, {7, 10}, {4, 11}, {5, 11}, {6, 11}, {5, 12}  ,  {14, 7}, {13, 8}, {14, 8}, {15, 8}, {12, 9}, {13, 9}, {14, 9}, {15, 9}, {16, 9} , {12, 10}, {13, 10}, {14, 10}, {15, 10}, {16, 10}, {13, 11}, {14, 11}, {15, 11}, {14, 12}      ,     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 0}, {1, 1}, {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {3, 0}, {3, 1}, {4, 0}       ,      {19, 0}, {19, 1}, {19, 2}, {19, 3}, {19, 4}, {18, 0}, {18, 1}, {18, 2}, {18, 3}, {17, 0}, {17, 1}, {17, 2}, {16, 0}, {16, 1}, {15, 0}       ,      {0, 19}, {1, 19}, {2, 19}, {3, 19}, {4, 19}, {0, 18}, {1, 18}, {2, 18}, {3, 18}, {0, 17}, {1, 17}, {2, 17}, {0, 16}, {1, 16}, {0, 15}        ,      {15, 19}, {16, 19}, {17, 19}, {18, 19}, {19, 19}, {16, 18}, {17, 18}, {18, 18}, {19, 18}, {17, 17}, {18, 17}, {19, 17}, {18, 16}, {19, 16}, {19, 15} };
-int ileScian = sizeof(Sciany) / sizeof(Sciany[0]);
+
+Point* Poziomy[3] = {
+	Sciany1,
+	Sciany2,
+	Sciany3
+};
+
+int RozmiarPoziomow[3] = {
+	LEN(Sciany1),
+	LEN(Sciany2),
+	LEN(Sciany3)
+};
+
+int obecnyPoziom = 0;
+
 int lastDirection = DOWN;
 
 int UpKey    = 0;
@@ -31,7 +45,12 @@ int RightKey = 0;
 
 int wynik = 0;
 
+bool pause = 1;
+
 bool isOnWall(int x, int y) {
+	Point* Sciany = Poziomy[obecnyPoziom];
+	int ileScian = RozmiarPoziomow[obecnyPoziom];
+
 	for (int i = 0; i < ileScian; i++) {
 		if (x == Sciany[i].x && y == Sciany[i].y) {
 			return true;
@@ -123,6 +142,18 @@ int keyDownEvent(SDL_Event e) {
 		RightKey = 1;
 		//lastDirection = RIGHT;
 		break;
+	case SDL_SCANCODE_1:
+		obecnyPoziom = 0;
+		break;
+	case SDL_SCANCODE_2:
+		obecnyPoziom = 1;
+		break;
+	case SDL_SCANCODE_3:
+		obecnyPoziom = 2;
+		break;
+	case SDL_SCANCODE_P:
+		pause = !pause;
+		break;
 	case SDL_SCANCODE_ESCAPE:
 		return 1;
 	}
@@ -132,6 +163,8 @@ int keyDownEvent(SDL_Event e) {
 bool Update(int direction)
 {
 	int dx=0, dy=0;
+	Point* Sciany = Poziomy[obecnyPoziom];
+	int ileScian = RozmiarPoziomow[obecnyPoziom];
 	
 	switch (direction)
 	{
@@ -173,7 +206,7 @@ bool Update(int direction)
 	int nx, ny;
 	nx = Head->x + dx;
 	ny = Head->y + dy;
-	if (isPart(nx, ny, Head) || isOnWall(nx, ny) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
+	if (isPart(nx, ny, Head) || isOnWall(nx, ny, Sciany, ileScian) || nx >= WIDTH || nx < 0 || ny >= HEIGHT || ny < 0)
 	{
 		return false;
 	}
@@ -234,6 +267,20 @@ int main() {
 	if (!init()) {
 		return -1;
 	}
+	while (pause) {
+		SDL_Event e;
+		SDL_SetRenderDrawColor(renderer, 188, 188, 188, 255);
+		SDL_RenderClear(renderer);
+		DrawChoice(obecnyPoziom, renderer);
+		if (SDL_PollEvent(&e)) {
+			switch (e.type) {
+			case SDL_KEYDOWN:
+				keyDownEvent(e);
+				break;
+			}
+		}
+		SDL_Delay(50);
+	}
 	
 	bool running = true;
 	float elapsedTime = 0;
@@ -285,7 +332,10 @@ int main() {
 
 		Uint64 end = SDL_GetPerformanceCounter();
 		
-		elapsedTime += (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.f;
+		if (!pause) {
+			elapsedTime += (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.f;
+		}
+		
 		//printf("lasdir - %d\n", lastDirection);
 		//SDL_Delay(100);
 		

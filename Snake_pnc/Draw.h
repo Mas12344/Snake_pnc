@@ -25,7 +25,7 @@ void DrawBoard(int** board, int score_val, SDL_Renderer* renderer) {
 			
 			switch (board[y][x]) {
 			case FRUIT:
-				SDL_SetRenderDrawColor(renderer, 200, 80, 15, 255);
+				SDL_SetRenderDrawColor(renderer, 253, 47, 217, 255);
 				break;
 			case SNAKE:
 				mr.x = r.x + TILE_SIZE / 10;
@@ -70,7 +70,7 @@ void DrawBoard(int** board, int score_val, SDL_Renderer* renderer) {
 	Message_rect.x = WIDTH * TILE_SIZE + 20;
 	Message_rect.y = 20;
 	Message_rect.w = BLANK_SPACE_PX - 40;
-	Message_rect.h = 45;
+	Message_rect.h = 69;
 
 	int w = SDL_RenderCopy(renderer, t_Message, NULL, &Message_rect);
 	//printf("czcionka: %d\n", w);
@@ -83,5 +83,58 @@ void DrawBoard(int** board, int score_val, SDL_Renderer* renderer) {
 	SDL_RenderPresent(renderer);
 }
 
+void DrawChoice(int choice, SDL_Renderer* renderer) {
+	// text
+	char com1[256] = "Wybierz poziom 1-3";
+	char com2[256] = "Wcisnij p aby zaczac";
+	//char score[12];
+	//sprintf(score, "%d", score_val);
+	//strcat(points, score);
 
+
+	TTF_Font* Sans = TTF_OpenFont("OpenSans-Regular.ttf", 128);
+
+	SDL_Color White = { 255, 255, 255 };
+
+	SDL_Surface* s_Message = TTF_RenderText_Solid(Sans, com1, White);
+
+	SDL_Texture* t_Message = SDL_CreateTextureFromSurface(renderer, s_Message);
+
+	SDL_Rect Message_rect;
+	Message_rect.x = 20;
+	Message_rect.y = 20;
+	Message_rect.w = TILE_SIZE*WIDTH + BLANK_SPACE_PX - 40;
+	Message_rect.h = (TILE_SIZE*HEIGHT - 40)/4;
+
+	int w = SDL_RenderCopy(renderer, t_Message, NULL, &Message_rect);
+	//
+	s_Message = TTF_RenderText_Solid(Sans, com2, White);
+
+	t_Message = SDL_CreateTextureFromSurface(renderer, s_Message);
+
+	Message_rect.x = 20;
+	Message_rect.y = (TILE_SIZE * HEIGHT - 40) / 4 + 20;
+	Message_rect.w = TILE_SIZE * WIDTH + BLANK_SPACE_PX - 40;
+	Message_rect.h = (TILE_SIZE * HEIGHT - 40) / 4;
+
+	w = SDL_RenderCopy(renderer, t_Message, NULL, &Message_rect);
+	//
+
+
+	char wybor[2] = { choice + '1' };
+	s_Message = TTF_RenderText_Solid(Sans, wybor, White);
+	t_Message = SDL_CreateTextureFromSurface(renderer, s_Message);
+	Message_rect.x = (TILE_SIZE * WIDTH + BLANK_SPACE_PX - 40) / 3 + 20;
+	Message_rect.y = (TILE_SIZE * HEIGHT) / 2 + 20;
+	Message_rect.w = (TILE_SIZE*WIDTH + BLANK_SPACE_PX - 40)/3;
+	Message_rect.h = (TILE_SIZE*HEIGHT - 40)/2;
+	SDL_RenderCopy(renderer, t_Message, NULL, &Message_rect);
+
+	SDL_FreeSurface(s_Message);
+	SDL_DestroyTexture(t_Message);
+	TTF_CloseFont(Sans);
+
+
+	SDL_RenderPresent(renderer);
+}
 #endif // !DRAW_H
