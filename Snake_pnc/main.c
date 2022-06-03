@@ -125,22 +125,18 @@ int keyDownEvent(SDL_Event e) {
 	case SDL_SCANCODE_DOWN:
 		DownKey = UpKey = LeftKey = RightKey = 0;
 		DownKey = 1;
-		//lastDirection = DOWN;
 		break;
 	case SDL_SCANCODE_LEFT:
 		DownKey = UpKey = LeftKey = RightKey = 0;
 		LeftKey = 1;
-		//lastDirection = LEFT;
 		break;
 	case SDL_SCANCODE_UP:
 		DownKey = UpKey = LeftKey = RightKey = 0;
 		UpKey = 1;
-		//lastDirection = UP;
 		break;
 	case SDL_SCANCODE_RIGHT:
 		DownKey = UpKey = LeftKey = RightKey = 0;
 		RightKey = 1;
-		//lastDirection = RIGHT;
 		break;
 	case SDL_SCANCODE_1:
 		obecnyPoziom = 0;
@@ -336,8 +332,6 @@ int main() {
 			elapsedTime += (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.f;
 		}
 		
-		//printf("lasdir - %d\n", lastDirection);
-		//SDL_Delay(100);
 		
 	}
 	
@@ -345,5 +339,3 @@ int main() {
 	return 0;
 }
 
-
-// Lambert Lambert, ty *****!
